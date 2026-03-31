@@ -10,7 +10,7 @@ st.title("Pitching Metric Correlations")
 DATA_DIR = Path(__file__).parent
 
 ALL_METRICS = [
-    "tj_stuff", "ERA", "xERA", "FIP", "xFIP", "Stuff+", "Pitching+",
+    "tjStuff+", "ERA", "xERA", "FIP", "xFIP", "Stuff+", "Pitching+",
     "botOvr", "botStf", "SIERA", "RA9", "DRA", "cFIP",
     "StuffPro", "PitchPro", "RV100", "wOBA",
 ]
@@ -41,13 +41,13 @@ def _wcorr(x, y, w):
 def load_data():
     tj24 = (
         pl.read_csv(DATA_DIR / "tjstats_pitcher_tjstuff__2024.csv")
-        .rename({"pitcher_id": "MLBAMID", "stuff_overall": "tj_stuff"})
-        .select(["MLBAMID", "tj_stuff"])
+        .rename({"pitcher_id": "MLBAMID", "stuff_overall": "tjStuff+"})
+        .select(["MLBAMID", "tjStuff+"])
     )
     tj25 = (
         pl.read_csv(DATA_DIR / "tjstats_pitcher_tjstuff__2025.csv")
-        .rename({"pitcher_id": "MLBAMID", "stuff_overall": "tj_stuff"})
-        .select(["MLBAMID", "tj_stuff"])
+        .rename({"pitcher_id": "MLBAMID", "stuff_overall": "tjStuff+"})
+        .select(["MLBAMID", "tjStuff+"])
     )
 
     fg_cols = [
