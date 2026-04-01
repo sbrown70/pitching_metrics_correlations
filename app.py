@@ -16,7 +16,7 @@ ALL_METRICS = [
     "StuffPro", "PitchPro", "RV100", "wOBA",
 ]
 
-DEFAULT_TARGETS = ["ERA", "K-BB", "FIP", "xERA", "SIERA", "wOBA"]
+DEFAULT_TARGETS = ["ERA", "xERA", "wOBA", "RV100",]
 
 
 # ---------------------------------------------------------------------------
@@ -189,8 +189,8 @@ def compute_corr(x, y, w, use_spearman):
 st.sidebar.header("Settings")
 
 st.sidebar.subheader("IP Filters")
-ip_min_24 = st.sidebar.number_input("Min IP (2024)", 0, 300, 30, step=5)
-ip_min_25 = st.sidebar.number_input("Min IP (2025)", 0, 300, 30, step=5)
+ip_min_24 = st.sidebar.number_input("Min IP (2024)", 0, 300, 10, step=5)
+ip_min_25 = st.sidebar.number_input("Min IP (2025)", 0, 300, 10, step=5)
 
 corr_type = st.sidebar.radio("Correlation Type", ["Spearman", "Pearson"])
 use_spearman = corr_type == "Spearman"
