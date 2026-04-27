@@ -10,7 +10,7 @@ st.title("Pitching Metric Correlations")
 DATA_DIR = Path(__file__).parent
 
 ALL_METRICS = [
-    "proStuff+", "proStuff_xRV",
+    "proStuff+", "proPitching+",
     "tjStuff+", "ERA", "xERA", "FIP", "xFIP", "K-BB", "Stuff+", "Pitching+",
     "botOvr", "botStf", "SIERA", "RA9", "DRA", "cFIP",
     "StuffPro", "PitchPro", "RV100", "wOBA",
@@ -93,16 +93,31 @@ def load_data():
     # proStuff+ (Oracle Pitch Profiler)
     ps24 = (
         pl.read_csv(DATA_DIR / "prostuff_2024.csv")
-        .rename({"mlbam_id": "MLBAMID", "stuff_plus": "proStuff+", "stuff_xRV": "proStuff_xRV"})
-        .select(["MLBAMID", "proStuff+", "proStuff_xRV"])
+        .rename({"mlbam_id": "MLBAMID", "stuff_plus": "proStuff+"})
+        .select(["MLBAMID", "proStuff+"])
     )
     ps25 = (
         pl.read_csv(DATA_DIR / "prostuff_2025.csv")
-        .rename({"mlbam_id": "MLBAMID", "stuff_plus": "proStuff+", "stuff_xRV": "proStuff_xRV"})
-        .select(["MLBAMID", "proStuff+", "proStuff_xRV"])
+        .rename({"mlbam_id": "MLBAMID", "stuff_plus": "proStuff+"})
+        .select(["MLBAMID", "proStuff+"])
     )
 
-    return (tj24, tj25), (fg24, fg25), (dra24, dra25), (sp24, sp25), (sc24, sc25), (ps24, ps25)
+    # proPitching+ (Oracle Pitch Profiler)
+    pp24 = (
+        pl.read_csv(DATA_DIR / "propitching_2024.csv")
+        .rename({"mlbam_id": "MLBAMID", "pitching_plus": "proPitching+"})
+        .select(["MLBAMID", "proPitching+"])
+    )
+    pp25 = (
+        pl.read_csv(DATA_DIR / "propitching_2025.csv")
+        .rename({"mlbam_id": "MLBAMID", "pitching_plus": "proPitching+"})
+        .select(["MLBAMID", "proPitching+"])
+    )
+
+    return (
+        (tj24, tj25), (fg24, fg25), (dra24, dra25),
+        (sp24, sp25), (sc24, sc25), (ps24, ps25), (pp24, pp25),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -115,7 +130,7 @@ def _pd_merge_across(src24, src25):
 
 
 def build_across(data, ip_min_24, ip_min_25, weight_method):
-    (tj24, tj25), (fg24, fg25), (dra24, dra25), (sp24, sp25), (sc24, sc25), (ps24, ps25) = data
+    (tj24, tj25), (fg24, fg25), (dra24, dra25), (sp24, sp25), (sc24, sc25), (ps24, ps25), (pp24, pp25) = data
 
     merged = pl.from_pandas(
         _pd_merge_across(tj24, tj25)
@@ -124,6 +139,7 @@ def build_across(data, ip_min_24, ip_min_25, weight_method):
         .merge(_pd_merge_across(sp24, sp25), on="MLBAMID", how="inner")
         .merge(_pd_merge_across(sc24, sc25), on="MLBAMID", how="inner")
         .merge(_pd_merge_across(ps24, ps25), on="MLBAMID", how="inner")
+        .merge(_pd_merge_across(pp24, pp25), on="MLBAMID", how="inner")
     )
 
     merged = merged.filter(
@@ -149,7 +165,7 @@ def build_across(data, ip_min_24, ip_min_25, weight_method):
 
 
 def build_same(data, ip_min_24, ip_min_25, weight_method):
-    (tj24, tj25), (fg24, fg25), (dra24, dra25), (sp24, sp25), (sc24, sc25), (ps24, ps25) = data
+    (tj24, tj25), (fg24, fg25), (dra24, dra25), (sp24, sp25), (sc24, sc25), (ps24, ps25), (pp24, pp25) = data
 
     fg24_f = fg24.filter(pl.col("IP") >= ip_min_24)
     fg25_f = fg25.filter(pl.col("IP") >= ip_min_25)
@@ -161,6 +177,7 @@ def build_same(data, ip_min_24, ip_min_25, weight_method):
         .merge(pl.concat([sp24, sp25]).to_pandas(), on="MLBAMID", how="inner")
         .merge(pl.concat([sc24, sc25]).to_pandas(), on="MLBAMID", how="inner")
         .merge(pl.concat([ps24, ps25]).to_pandas(), on="MLBAMID", how="inner")
+        .merge(pl.concat([pp24, pp25]).to_pandas(), on="MLBAMID", how="inner")
     )
 
     if weight_method == "IP":
